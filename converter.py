@@ -262,8 +262,6 @@ class Converter(object):
 
 if __name__ == "__main__":
     """for test purpose"""
-    birthday_lunar = Lunar.from_date(
-        type('Auto', (), dict(year=2008, month=1, day=1))
-    )
+    birthday_lunar = Lunar.from_date(datetime.date(year=2008, month=1, day=1))
     for year in range(birthday_lunar.year, min(birthday_lunar.year + 100, 2100)):
         print(Lunar(year, birthday_lunar.month, birthday_lunar.day).to_date())
