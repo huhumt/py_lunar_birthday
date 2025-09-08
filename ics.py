@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from base64 import b16encode
+from collections import OrderedDict
+from dataclasses import dataclass
+from typing import Optional
 
 calendar_template: str = """BEGIN:VCALENDAR
 PRODID:-//Google Inc//Google Calendar 70.9054//EN
@@ -16,7 +18,7 @@ X-WR-TIMEZONE:Asia/Taipei
 END:VCALENDAR"""
 
 event_template: str = """BEGIN:VEVENT
-UID:{uuid}@lunar_calendar.py
+UID:{uid}@lunar_calendar.py
 SEQUENCE:0
 DTSTAMP:{generate_timestamp}
 DTSTART;VALUE=DATE:{date_start}
@@ -28,37 +30,43 @@ STATUS:CONFIRMED
 DESCRIPTION:{description}
 END:VEVENT"""
 
+@dataclass
+class IcsEvent:
+    event: str       # event name
+    start_date: str  # event start date
+    end_date: str    # event end date
+    description: Optional[str] = None
 
-def generate_ics_file(event_list: list, filename: str = "lunar_calendar.ics"):
+
+def generate_ics_file(event_dict: OrderedDict[str, IcsEvent], filename: str = "lunar_calendar.ics"):
     """generate ics file with given information"""
     timestamp = datetime.now().strftime('%Y%m%dT%H%M%SZ')
     with open(filename, "w", encoding="utf-8", newline='\r\n') as f:
         f.write(calendar_template.format(event="\n".join([
             event_template.format(
-                uuid = b16encode(f'{event.get("name")}{event.get("date_start")}'.encode()).decode(),
+                uid = k,
                 generate_timestamp=timestamp,
-                date_start=event.get("date_start"),
-                date_end=event.get("date_end"),
-                summary=event.get("name"),
-                description=event.get("description")
-            ) for event in event_list])
+                date_start=v.start_date,
+                date_end=v.end_date,
+                summary=v.event,
+                description=v.description or v.event
+            ) for k, v in event_dict.items()])
         ))
 
 
 if __name__ == "__main__":
     """for test purpose only"""
-    event_list = [
-        {
-            "name": "test001",
-            "date_start": "20250102",
-            "date_end": "20250103",
-            "description": "good test"
-        },
-        {
-            "name": "test002",
-            "date_start": "20251112",
-            "date_end": "20251113",
-            "description": "good test"
-        }
-    ]
-    generate_ics_file(event_list)
+    event_dict = OrderedDict({
+        "1234": IcsEvent(
+            "test001",
+            "20250102",
+            "20250103",
+            "good test"
+        ),
+        "5678": IcsEvent(
+            "test002",
+            "20251112",
+            "20251113"
+        )
+    })
+    generate_ics_file(event_dict)
