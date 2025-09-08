@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from uuid import uuid4
+from base64 import b16encode
 
 calendar_template: str = """BEGIN:VCALENDAR
 PRODID:-//Google Inc//Google Calendar 70.9054//EN
@@ -35,7 +35,7 @@ def generate_ics_file(event_list: list, filename: str = "lunar_calendar.ics"):
     with open(filename, "w", encoding="utf-8", newline='\r\n') as f:
         f.write(calendar_template.format(event="\n".join([
             event_template.format(
-                uuid = uuid4().hex,
+                uuid = b16encode(f'{event.get("name")}{event.get("date_start")}'.encode()).decode(),
                 generate_timestamp=timestamp,
                 date_start=event.get("date_start"),
                 date_end=event.get("date_end"),
