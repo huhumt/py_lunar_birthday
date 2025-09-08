@@ -8,6 +8,7 @@ from datetime import timedelta
 birthday_list = [
     {
     "name": "野比大雄生日",
+    # this is from solar calendar date
     "date": dict(year=2008, month=1, day=3),
     },
     {
